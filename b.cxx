@@ -303,7 +303,8 @@ void dec2bin(u_int64_t valor) {
 
         populated = true;
 
-        if (current_pwr != 0) { valor -= (1 << (current_pwr - 1)); } else { valor -= 1; }
+
+        valor -= (current_pwr != 0) ? (1 << ( current_pwr - 1)) : 1;
 
         for (BitFlag::reverse_iterator rev_iter = bits.rbegin(); rev_iter != bits.rend(); rev_iter++) {
             if (current_idx == current_pwr - 1) {
