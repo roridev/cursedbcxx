@@ -11,7 +11,6 @@
  * A ironia disso não foi perdida, essa era nossa intenção.
  */
 
-#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <memory>
@@ -256,7 +255,7 @@ void bin2dec (u_int64_t valor) {
 
     for (BitFlag::reverse_iterator iter = flags.rbegin(); iter != flags.rend(); iter++) {
         bool val = *iter;
-        acc += pow(2, current_pwr) * int(val);
+        acc +=  (int(val) << current_pwr);
         current_pwr += 1;
     }
 
@@ -294,14 +293,14 @@ void dec2bin(u_int64_t valor) {
     bool populated = false;
 
     while (valor != 0){
-        while (pow(2, current_pwr) <= valor) {
+        while ((1 << current_pwr) <= valor) {
             if (!populated) bits.push_front(false);
             current_pwr++;
         }
 
         populated = true;
 
-        if (current_pwr != 0) { valor -= pow(2, (current_pwr - 1)); } else { valor -= 1; }
+        if (current_pwr != 0) { valor -= (1 << (current_pwr - 1)); } else { valor -= 1; }
 
         for (BitFlag::reverse_iterator rev_iter = bits.rbegin(); rev_iter != bits.rend(); rev_iter++) {
             if (current_idx == current_pwr - 1) {
