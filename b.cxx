@@ -254,8 +254,11 @@ void bin2dec (u_int64_t valor) {
     uint64_t current_pwr = 0;
 
     for (BitFlag::reverse_iterator iter = flags.rbegin(); iter != flags.rend(); iter++) {
-        bool val = *iter;
-        acc +=  (int(val) << current_pwr);
+        uint64_t val = uint64_t(*iter);
+        for (uint64_t i = 0; i < current_pwr; i++) {
+            val <<= 1;
+        }
+        acc +=  val;
         current_pwr += 1;
     }
 
