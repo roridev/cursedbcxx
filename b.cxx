@@ -67,6 +67,7 @@ template <typename T, typename... B> void prompt(T& t, B&... b) {
 bool flag = false;
 bool isValidBinaryNumber = false;
 u_int64_t input;
+u_int64_t SHARED_MOD_REGISTER = 0;
 
 void populate() {
     int count = 10;
@@ -92,6 +93,19 @@ void runUntilMatch(u_int64_t match) {
         populate();
         runUntilMatch(match);
     }
+}
+
+// NOTE: https://eprint.iacr.org/2014/755.pdf
+
+/*
+ * "Modern Intel processors have implemented the modulo operation in the form
+ * of a single division instruction.  This instruction will return both the quotient
+ * and remainder in different registers. Therefore the modulo operation can be
+ * computed in a single clock cycle"
+ */
+void barretMod(u_int64_t x, u_int64_t y) {
+    // Risada maligna
+    SHARED_MOD_REGISTER = x - (((int) floor((x/(double)y)))*y);
 }
 
 void menu() {
@@ -190,9 +204,8 @@ void validateBinary(u_int64_t valor) {
     // Para pegar a casa da unidade atual é trivial. Um simples x % 10.
 
     while (valor != 0) {
-
-        // TODO: Divisão é lento, logo modulo também é. Gambiarrar até que não exista nenhum módulo.
-        current_digit = valor % 10;
+        barretMod(valor, 10);
+        current_digit = SHARED_MOD_REGISTER;
         flags.push_front((current_digit & 14) == 0);
         valor /= 10;
         current_pwr++;
@@ -221,8 +234,8 @@ void bin2dec (u_int64_t valor) {
         // Isso pega o valor do ultimo bit.
 
 
-        // TODO: Divisão é lento, logo modulo também é. Gambiarrar até que não exista nenhum módulo.
-        flags.push_front(valor % 2 == 1);
+        barretMod(valor, 2);
+        flags.push_front(SHARED_MOD_REGISTER == 1);
 
         // Manda o shr decimal kkkj
         valor /= 10;
