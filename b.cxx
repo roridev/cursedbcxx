@@ -25,6 +25,7 @@
 #include <boost/circular_buffer.hpp>
 // E uma double-linked list, pq não?
 #include <list>
+#include <vector>
 
 // TODO: Remover os usos da lib Boost. Usar só stdlib.
 #include <boost/random/uniform_int_distribution.hpp>
@@ -63,10 +64,30 @@ template <typename T, typename... B> void prompt(T& t, B&... b) {
     std::cin >> t;
 }
 
+template <typename T> void print_arr(T& t) {
+    int idx = 0;
+    std::cout << "[";
+    for (auto a: t) {
+        std::cout << a;
+        if(idx != t.size() - 1) {
+            std::cout << ",";
+        }
+        idx++;
+    }
+    std::cout << "]";
+}
+
+
 bool flag = false;
 bool isValidBinaryNumber = false;
 u_int64_t input;
 u_int64_t SHARED_MOD_REGISTER = 0;
+u_int64_t SHARED_WIDTH_REGISTER = 0;
+u_int64_t SHARED_INDEX_REGISTER = 0;
+u_int64_t SHARED_ACC_REGISTER = 0;
+BitFlag SHARED_BITFLAG;
+
+std::vector<u_int64_t> splitted;
 
 void populate() {
     int count = 10;
@@ -106,6 +127,133 @@ void barretMod(u_int64_t x, u_int64_t y) {
     // Risada maligna
     SHARED_MOD_REGISTER = x - (((int) floor((x/(double)y)))*y);
 }
+
+void calculate_width(u_int64_t alpha) {
+    // Code like its ASM!!!!
+    SHARED_INDEX_REGISTER = 0;    // EAX time!!!
+    while (1 << SHARED_INDEX_REGISTER <= alpha) {
+        SHARED_INDEX_REGISTER++;
+    }
+}
+
+// Esse algoritmo para computar módulo requer converter
+// O valor em binário e dividir em pedacinhos.
+
+// Ou seja, cada uso de `ko_willMod` requer uma conversão em binário.
+
+// Lindo demais.
+
+// Como o unico módulo para converter em binário utilizando meu método
+// é mod 2, teremos que descobrir um jeito de fazer mod 2 sem usar módulo.
+// Caso contrário, o programa nunca termina.
+void split(u_int64_t alpha, u_int64_t omega) {
+    u_int64_t old_alpha = alpha;
+
+    SHARED_ACC_REGISTER = 0; //Current Power
+    SHARED_INDEX_REGISTER = 0; //Current Index
+
+    SHARED_BITFLAG.clear(); // Bits
+
+    bool populated = false;
+
+    while (alpha != 0) {
+        while ((1 << SHARED_ACC_REGISTER) <= alpha) {
+            if (!populated) { SHARED_BITFLAG.push_front(false); }
+            SHARED_ACC_REGISTER++;
+        }
+
+        populated = true;
+
+        alpha -= (SHARED_ACC_REGISTER != 0) ? (1 << ( SHARED_ACC_REGISTER - 1)) : 1;
+
+         for (BitFlag::reverse_iterator rev_iter = SHARED_BITFLAG.rbegin(); rev_iter != SHARED_BITFLAG.rend(); rev_iter++) {
+            if (SHARED_INDEX_REGISTER == SHARED_ACC_REGISTER - 1) {
+                *rev_iter = true;
+            }
+            SHARED_INDEX_REGISTER++;
+        }
+
+        SHARED_ACC_REGISTER = 0;
+        SHARED_INDEX_REGISTER = 0;
+    }
+
+    BitFlag acc;
+
+
+    /// 100011
+    //       ^ [1]
+    //      ^  [11]
+    //     ^   [011]
+    //    ^    [0011]
+
+    // ------- [[0011]], []
+    //   ^     [[0011]], [0]
+    //  ^      [[0011]], [10]
+    //-----------------------
+    //         [[0011],[0010]]
+
+    for (BitFlag::reverse_iterator rev_iter = SHARED_BITFLAG.rbegin(); rev_iter != SHARED_BITFLAG.rend(); rev_iter++) {
+        acc.push_front(*rev_iter);
+        if(acc.size() == omega) {
+            SHARED_INDEX_REGISTER = 0;
+            for (BitFlag::reverse_iterator rev_acc = acc.rbegin(); rev_acc != acc.rend(); rev_acc++) {
+                SHARED_ACC_REGISTER += (1 << SHARED_INDEX_REGISTER) * int(*rev_acc);
+                SHARED_INDEX_REGISTER++;
+            }
+            splitted.push_back(SHARED_ACC_REGISTER);
+            acc.clear();
+        }
+    }
+
+    if (acc.size() != 0) {
+        SHARED_INDEX_REGISTER = 0;
+        for (BitFlag::reverse_iterator rev_acc = acc.rbegin(); rev_acc != acc.rend(); rev_acc++) {
+            SHARED_ACC_REGISTER += (1 << SHARED_INDEX_REGISTER) * int(*rev_acc);
+            SHARED_INDEX_REGISTER++;
+        }
+        splitted.push_back(SHARED_ACC_REGISTER);
+        acc.clear();
+    }
+
+    SHARED_INDEX_REGISTER = 0;
+    SHARED_ACC_REGISTER = 0;
+}
+
+
+void ko_willMod(u_int64_t x, u_int64_t y) {
+    calculate_width(y);
+    split(x, SHARED_INDEX_REGISTER);
+    calculate_width(y);
+
+    u_int64_t n = splitted.size() - 1;
+    barretMod(((1 << 1) << SHARED_INDEX_REGISTER), y);
+
+    while (n > 0) {
+        auto t = splitted[n];
+        for (u_int64_t i = SHARED_INDEX_REGISTER; i > 0; i--) {
+            t = t << 1;
+            while ((t & (1 << SHARED_INDEX_REGISTER)) == 1) {
+                t &= ~(1 << SHARED_INDEX_REGISTER);
+                t += SHARED_MOD_REGISTER;
+            }
+        }
+        splitted[n-1] += t;
+        while (((splitted[n-1]) & (1 << SHARED_INDEX_REGISTER)) == 1) {
+            splitted[n-1] &= ~(1 << SHARED_INDEX_REGISTER);
+            splitted[n-1] += SHARED_MOD_REGISTER;
+        }
+        n--;
+    }
+
+    while (splitted[0] > y) {
+        splitted[0] -= y;
+    }
+
+    SHARED_INDEX_REGISTER = 0;
+    SHARED_MOD_REGISTER = splitted[0];
+}
+
+
 
 void menu() {
 
@@ -171,7 +319,6 @@ void validateBinary(u_int64_t valor) {
     // Base 10 possui 10 numeros: [0,1,2,3,4,5,6,7,8,9]
     // Desses, apenas dois nos interessa. 0 e 1.
     u_int64_t current_pwr = 0;
-    u_int64_t current_digit = 0;
     BitFlag flags;
 
     // A ideia pra checkar isso é simples
