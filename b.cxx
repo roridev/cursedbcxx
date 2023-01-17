@@ -19,16 +19,9 @@
 
 #include <stdio.h>
 
-// Precisamos de buffer circular
-
-// TODO: Remover os usos da lib Boost. Usar só stdlib.
-#include <boost/circular_buffer.hpp>
-// E uma double-linked list, pq não?
 #include <list>
 #include <vector>
 
-// TODO: Remover os usos da lib Boost. Usar só stdlib.
-#include <boost/random/uniform_int_distribution.hpp>
 #include <random>
 #include <sys/types.h>
 
@@ -39,7 +32,7 @@
 typedef std::list<bool> BitFlag;
 
 // RNG
-boost::random::uniform_int_distribution<> dist(0, 9);
+std::uniform_int_distribution<> dist(0, 9);
 std::random_device gen;
 
 
