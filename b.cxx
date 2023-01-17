@@ -35,7 +35,6 @@
 #include <utility>
 
 // Cria um buffer circular com tamanho 10
-boost::circular_buffer<u_int64_t> bcd_buffer (10);
 
 typedef std::list<bool> BitFlag;
 
@@ -88,32 +87,6 @@ u_int64_t SHARED_ACC_REGISTER = 0;
 BitFlag SHARED_BITFLAG;
 
 std::vector<u_int64_t> splitted;
-
-void populate() {
-    int count = 10;
-    while(count != 0) {
-        int num = dist(gen);
-        bcd_buffer.push_front(num);
-        count--;
-    }
-}
-
-/*
- * Time to go bogo!
- */
-
-void runUntilMatch(u_int64_t match) {
-    int count = 10;
-    while (bcd_buffer.front() != match || count != 0) {
-        bcd_buffer.pop_front();
-        count--;
-    }
-
-    if (count == 0) {
-        populate();
-        runUntilMatch(match);
-    }
-}
 
 // NOTE: https://eprint.iacr.org/2014/755.pdf
 
