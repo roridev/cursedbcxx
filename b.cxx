@@ -350,7 +350,7 @@ void validateBinary(u_int64_t valor) {
     // Para pegar a casa da unidade atual é trivial. Um simples x % 10.
 
     while (valor != 0) {
-        barretMod(valor, 10);
+        ko_willMod(valor, 10);
         flags.push_front((SHARED_MOD_REGISTER & (0b111 << 1) ) == 0);
         valor /= 10;
         current_pwr++;
@@ -379,7 +379,7 @@ void bin2dec (u_int64_t valor) {
         // Isso pega o valor do ultimo bit.
 
 
-        barretMod(valor, (1 << 1));
+        ko_willMod(valor, (1 << 1));
         flags.push_front(SHARED_MOD_REGISTER == 1);
 
         // Manda o shr decimal kkkj
