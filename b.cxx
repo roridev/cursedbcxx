@@ -20,6 +20,9 @@
 #include <random>
 #include <sys/types.h>
 
+#include <cmath>
+
+
 
 // Cria um buffer circular com tamanho 10
 
