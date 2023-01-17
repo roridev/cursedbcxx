@@ -11,13 +11,8 @@
  * A ironia disso não foi perdida, essa era nossa intenção.
  */
 
-#include <cstdint>
 #include <iostream>
-#include <memory>
-#include <ostream>
 #include <iterator>
-
-#include <stdio.h>
 
 #include <list>
 #include <vector>
@@ -25,7 +20,6 @@
 #include <random>
 #include <sys/types.h>
 
-#include <utility>
 
 // Cria um buffer circular com tamanho 10
 
